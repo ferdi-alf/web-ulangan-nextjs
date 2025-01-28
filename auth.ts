@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import NextAuth from "next-auth";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { prisma } from "@/lib/prisma";
@@ -6,7 +7,7 @@ import { LoginSchema } from "@/lib/zod";
 import { compareSync } from "bcrypt-ts";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
-  adapter: PrismaAdapter(prisma),
+  adapter: PrismaAdapter(prisma) as any,
   session: { strategy: "jwt" },
   pages: {
     signIn: "/",
@@ -37,7 +38,10 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
         if (!passwordMatch) return null;
 
-        return user;
+        return {
+          ...user,
+          username: user.username || "",
+        };
       },
     }),
   ],
@@ -45,13 +49,25 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   callbacks: {
     authorized({ auth, request: { nextUrl } }) {
       const isLoggIn = !!auth?.user;
-      const ProtectedRoutes = ["/dashboard", "/user", "/product"];
+      const ProtectedRoutes = ["/dashboard", "/ujian"];
+      const userRole = auth?.user?.role;
 
       if (!isLoggIn && ProtectedRoutes.includes(nextUrl.pathname)) {
         return Response.redirect(new URL("/", nextUrl));
       }
       if (isLoggIn && nextUrl.pathname === "/") {
-        return Response.redirect(new URL("/dashboard", nextUrl));
+        const redirectUrl = userRole === "SISWA" ? "/ujian" : "/dashboard";
+        return Response.redirect(new URL(redirectUrl, nextUrl));
+      }
+
+      if (isLoggIn) {
+        if (userRole === "SISWA" && nextUrl.pathname === "/dashboard") {
+          return Response.redirect(new URL("/ujian", nextUrl));
+        }
+
+        if (userRole !== "SISWA" && nextUrl.pathname === "/ujian") {
+          return Response.redirect(new URL("/dashboard", nextUrl));
+        }
       }
 
       return true;

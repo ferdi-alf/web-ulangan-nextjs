@@ -44,9 +44,9 @@ const LoginPage = () => {
   }, [state?.message]);
 
   return (
-    <div className="p-8 bg-white/30  rounded-lg inset-0  backdrop-blur-md sm:w-3/5 shadow-lg max-w-md  ">
-      <h1 className="text-2xl text-center font-bold">Login</h1>
-      <form action={formAction}>
+    <div className="p-8 bg-white/30  rounded-lg inset-0   shadow-lg max-w-md  ">
+      <h1 className="text-2xl text-center font-bold ">Login</h1>
+      <form action={formAction} className="relative">
         <FormControl
           fullWidth
           error={!!state?.error?.username}

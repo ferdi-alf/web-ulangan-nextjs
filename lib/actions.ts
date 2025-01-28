@@ -25,7 +25,7 @@ export const LoginCredentials = async (
     await signIn("credentials", {
       username,
       password,
-      redirectTo: "/dashboard",
+      redirectTo: undefined,
     });
   } catch (error) {
     if (error instanceof AuthError) {
