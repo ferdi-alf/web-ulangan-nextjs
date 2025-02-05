@@ -51,6 +51,38 @@ const LoginPage = () => {
           fullWidth
           error={!!state?.error?.username}
           variant="standard"
+          sx={{
+            "& .MuiInput-root": {
+              backgroundColor: "transparent",
+              "&:before": {
+                borderBottom: "1px solid rgba(0, 0, 0, 0.42)", // Warna hitam saat tidak fokus
+              },
+              "&:hover:not(.Mui-disabled):before": {
+                borderBottom: "2px solid rgba(0, 0, 0, 0.87)",
+              },
+              "&:after": {
+                borderBottom: "2px solid #3b82f6", // Warna biru-500 untuk border bottom saat focus
+              },
+              "& input": {
+                color: "inherit",
+                backgroundColor: "transparent",
+                "&:-webkit-autofill": {
+                  WebkitBoxShadow: "0 0 0 1000px transparent inset",
+                  WebkitTextFillColor: "inherit",
+                  transition: "background-color 5000s ease-in-out 0s",
+                },
+              },
+            },
+            "& .MuiInputLabel-root": {
+              color: "rgba(0, 0, 0, 0.7)", // Warna hitam saat tidak fokus
+              "&.Mui-focused": {
+                color: "#3b82f6", // Warna biru-500 saat focus
+              },
+            },
+            "& .MuiFormHelperText-root": {
+              color: "error.main",
+            },
+          }}
         >
           <InputLabel htmlFor="component-error">Username</InputLabel>
           <Input
@@ -67,6 +99,38 @@ const LoginPage = () => {
           error={!!state?.error?.password}
           fullWidth
           className="mt-10"
+          sx={{
+            "& .MuiInput-root": {
+              backgroundColor: "transparent",
+              "&:before": {
+                borderBottom: "1px solid rgba(0, 0, 0, 0.42)", // Warna hitam saat tidak fokus
+              },
+              "&:hover:not(.Mui-disabled):before": {
+                borderBottom: "2px solid rgba(0, 0, 0, 0.87)",
+              },
+              "&:after": {
+                borderBottom: "2px solid #3b82f6", // Warna biru-500 untuk border bottom saat focus
+              },
+              "& input": {
+                color: "inherit",
+                backgroundColor: "transparent",
+                "&:-webkit-autofill": {
+                  WebkitBoxShadow: "0 0 0 1000px transparent inset",
+                  WebkitTextFillColor: "inherit",
+                  transition: "background-color 5000s ease-in-out 0s",
+                },
+              },
+            },
+            "& .MuiInputLabel-root": {
+              color: "rgba(0, 0, 0, 0.7)", // Warna hitam saat tidak fokus
+              "&.Mui-focused": {
+                color: "#3b82f6", // Warna biru-500 saat focus
+              },
+            },
+            "& .MuiFormHelperText-root": {
+              color: "error.main",
+            },
+          }}
         >
           <InputLabel htmlFor="standard-adornment-password">
             Password

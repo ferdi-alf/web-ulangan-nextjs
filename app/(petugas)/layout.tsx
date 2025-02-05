@@ -33,7 +33,7 @@ export default function RootLayout({
       <SidebarProvider>
         <ToastContainer
           position="top-right"
-          autoClose={5000}
+          autoClose={4000}
           hideProgressBar={false}
           newestOnTop={false}
           closeOnClick
@@ -48,7 +48,7 @@ export default function RootLayout({
           </div>
           <div className="flex relative h-screen overflow-y-auto w-full flex-col">
             <NavbarDashboard />
-            <main>{children}</main>
+            <main className="mt-24 p-2">{children}</main>
           </div>
         </div>
       </SidebarProvider>

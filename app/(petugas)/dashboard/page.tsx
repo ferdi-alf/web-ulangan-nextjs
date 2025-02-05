@@ -7,7 +7,7 @@ const Dashboard = async () => {
   const session = await auth();
   console.log(session);
   return (
-    <div className="mt-24 w-full p-2">
+    <div className=" w-full ">
       <div className="w-full grid gap-5 lg:grid-cols-4 grid-cols-2">
         <CardAdmin />
       </div>

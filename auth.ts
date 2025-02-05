@@ -48,26 +48,75 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   // ini kalbek sangat anjng
   callbacks: {
     authorized({ auth, request: { nextUrl } }) {
-      const isLoggIn = !!auth?.user;
-      const ProtectedRoutes = ["/dashboard", "/ujian"];
+      const isLoggedIn = !!auth?.user;
       const userRole = auth?.user?.role;
 
-      if (!isLoggIn && ProtectedRoutes.includes(nextUrl.pathname)) {
-        return Response.redirect(new URL("/", nextUrl));
-      }
-      if (isLoggIn && nextUrl.pathname === "/") {
+      const adminRoutes = [
+        "/dashboard",
+        "/kelas",
+        "/users",
+        "/tambah-siswa",
+        "/data-siswa",
+        "/tambah-soal",
+        "/data-soal",
+        "/ujian",
+        "/analytics",
+        "/nilai",
+      ];
+
+      const proktorRoutes = [
+        "/dashboard",
+        "/data-siswa",
+        "/data-soal",
+        "/ujian",
+        "/nilai",
+      ];
+
+      const siswaRoutes = ["/ujian"];
+
+      const isAdminRoute = adminRoutes.includes(nextUrl.pathname);
+      const isProktorRoute = proktorRoutes.includes(nextUrl.pathname);
+      const isSiswaRoute = siswaRoutes.includes(nextUrl.pathname);
+
+      // Redirect jika pengguna sudah login tetapi tetap di halaman utama "/"
+      if (isLoggedIn && nextUrl.pathname === "/") {
         const redirectUrl = userRole === "SISWA" ? "/ujian" : "/dashboard";
-        return Response.redirect(new URL(redirectUrl, nextUrl));
+        if (nextUrl.pathname !== (redirectUrl as string)) {
+          return Response.redirect(new URL(redirectUrl, nextUrl.origin));
+        }
       }
 
-      if (isLoggIn) {
-        if (userRole === "SISWA" && nextUrl.pathname === "/dashboard") {
-          return Response.redirect(new URL("/ujian", nextUrl));
-        }
+      switch (userRole) {
+        case "SISWA":
+          // Hanya redirect jika Siswa mengakses halaman yang bukan "/ujian"
+          if (!isSiswaRoute && nextUrl.pathname !== "/") {
+            return Response.redirect(new URL("/ujian", nextUrl.origin));
+          }
+          break;
 
-        if (userRole !== "SISWA" && nextUrl.pathname === "/ujian") {
-          return Response.redirect(new URL("/dashboard", nextUrl));
-        }
+        case "PROKTOR":
+          // Hanya redirect jika Proktor mencoba mengakses halaman admin yang tidak diperbolehkan
+          if (isAdminRoute && !isProktorRoute) {
+            return Response.redirect(new URL("/dashboard", nextUrl.origin));
+          }
+          break;
+
+        case "ADMIN":
+        case "SUPERADMIN":
+          // Admin dan Superadmin tidak perlu redirect jika halaman ada dalam adminRoutes
+          if (isAdminRoute) {
+            return true;
+          }
+          break;
+
+        default:
+        // Jika role tidak dikenali, redirect ke halaman utama
+        // return Response.redirect(new URL("/", nextUrl.origin));
+      }
+
+      // Redirect jika pengguna belum login dan mencoba mengakses halaman selain "/"
+      if (!isLoggedIn && nextUrl.pathname !== "/") {
+        return Response.redirect(new URL("/", nextUrl.origin));
       }
 
       return true;

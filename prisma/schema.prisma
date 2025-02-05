@@ -51,31 +51,51 @@ enum Role {
   ADMIN
   SUPERADMIN
 }
+enum Tingkat {
+  X
+  XI
+  XII
+}
+
+model Kelas {
+  id String @id @default(cuid())
+  tingkat Tingkat
+  jurusan String?
+  users User[]
+  siswaDetail SiswaDetail[]
+
+  @@map("kelas")
+}
+
  
 model User {
-  id            String    @id @default(cuid())
-  username      String?   @unique
-  image         String?
+  id       String  @id @default(cuid())
+  username String? @unique
+  image    String?
   role     Role    @default(SISWA)
-  password      String?
-  accounts      Account[]
-  sessions      Session[]
+  kelasId  String?  // Buat nullable
+  password String?
+  accounts Account[]
+  sessions Session[]
   siswaDetail SiswaDetail?
- 
+  kelas Kelas? @relation(fields: [kelasId], references: [id], onDelete: Cascade) // Buat juga nullable
+
   @@map("users")
 }
+
 
 
 model SiswaDetail {
   id          String   @id @default(cuid())
   userId      String   @unique
   name        String
-  tingkat     String
-  jurusan     String
+  kelasId     String
   tanggalLahir DateTime
   status      String   @default("AKTIF")
 
+  kelas Kelas @relation(fields: [kelasId], references: [id], onDelete: Cascade)
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@map("siswa_detail")
 }
 
 
