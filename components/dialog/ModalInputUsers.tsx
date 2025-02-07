@@ -49,7 +49,14 @@ const ModalInputUsers = () => {
           <DialogTitle>Tambah Data Kelas</DialogTitle>
           <DialogDescription>Tambahkan daftar kelas yang ada</DialogDescription>
           <form action={formAction}>
-            <FormInputUsers state={state} />
+            <FormInputUsers
+              state={state}
+              initialData={{
+                id: "",
+                username: "",
+                role: "",
+              }}
+            />
             <DialogFooter className="mt-10">
               <FormButton />
             </DialogFooter>

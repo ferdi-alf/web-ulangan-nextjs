@@ -66,6 +66,7 @@ const FormInputUsers = ({
 
   return (
     <>
+      <input type="hidden" name="id" value={initialData?.id} />
       <FormControl
         fullWidth
         className="mt-5"
@@ -138,7 +139,7 @@ const FormInputUsers = ({
       {roleError && <p className="text-red-500">{roleError}</p>}
 
       {selectedRole === "PROKTOR" && (
-        <Select name="kelasId" defaultValue={initialData.kelasId?.id}>
+        <Select name="kelasId" defaultValue={initialData?.kelasId?.id}>
           <p className="mt-4 mb-2 text-start text-gray-500 text-sm">
             Harap pilih kelas untuk menentukan kelas yang di awasi Proktor
           </p>

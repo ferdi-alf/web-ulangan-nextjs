@@ -12,7 +12,7 @@ import {
 import { FormButton } from "../button";
 import { useActionState, useEffect } from "react";
 import FormInputUsers from "../fragments/form-users";
-import { AddUser } from "@/lib/crudUsers";
+import { updateUsers } from "@/lib/crudUsers";
 import { toast } from "react-toastify";
 import { SquarePen } from "lucide-react";
 
@@ -31,7 +31,7 @@ interface UserData {
 }
 
 const ModalUpdateUsers = ({ userData }: { userData: UserData }) => {
-  const [state, formAction] = useActionState(AddUser, null);
+  const [state, formAction] = useActionState(updateUsers, null);
   console.log("pesan", state);
 
   useEffect(() => {
@@ -52,9 +52,16 @@ const ModalUpdateUsers = ({ userData }: { userData: UserData }) => {
     }
   }, [state]);
 
+  const handleModalClick = (event: React.MouseEvent) => {
+    event.stopPropagation(); // Mencegah event bubbling ke elemen induk
+  };
+
   return (
     <Dialog>
-      <DialogTrigger className="p-2 flex flex-wrap items-center gap-x-1 shadow-md rounded-md text-sm font-bold text-white bg-blue-500">
+      <DialogTrigger
+        onClick={handleModalClick}
+        className="p-2 flex flex-wrap items-center gap-x-1 shadow-md rounded-md text-sm font-bold text-white bg-blue-500"
+      >
         <SquarePen className="text-xs" />
         <p>Update</p>
       </DialogTrigger>

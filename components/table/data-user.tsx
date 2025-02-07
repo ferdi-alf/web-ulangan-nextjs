@@ -1,5 +1,7 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import * as React from "react";
+import useSWR from "swr";
 import {
   Box,
   Paper,
@@ -38,57 +40,81 @@ interface UsersData {
   image?: string;
 }
 
+// Wrapper untuk getUsers yang bisa digunakan dengan SWR
+const fetchUsers = async () => {
+  try {
+    const data = await getUsers();
+    return data;
+  } catch (error) {
+    console.error(error);
+    throw new Error("Failed to fetch users");
+  }
+};
+
 export default function DataUsers() {
-  const [admins, setAdmins] = React.useState<UsersData[]>([]);
-  const [proktors, setProktors] = React.useState<UsersData[]>([]);
   const [selectedAdmins, setSelectedAdmins] = React.useState<string[]>([]);
   const [selectedProktors, setSelectedProktors] = React.useState<string[]>([]);
-  const [page, setPage] = React.useState(0);
-  const [rowsPerPage, setRowsPerPage] = React.useState(5);
 
-  React.useEffect(() => {
-    async function fetchUsers() {
-      const rawData = await getUsers();
-      const data = rawData.map((user) => ({
-        id: user.id,
-        username: user.username || "",
-        role: user.role,
-        kelasId: user.kelas
-          ? {
-              id: user.kelas.id,
-              tingkat: user.kelas.tingkat,
-              jurusan: user.kelas.jurusan || "",
-            }
-          : undefined,
-        image: user.image || "",
-      })) as UsersData[];
+  const [pageAdmins, setPageAdmins] = React.useState(0);
+  const [rowsPerPageAdmins, setRowsPerPageAdmins] = React.useState(5);
+  const [pageProktors, setPageProktors] = React.useState(0);
+  const [rowsPerPageProktors, setRowsPerPageProktors] = React.useState(5);
 
-      setAdmins(data.filter((user) => user.role === "ADMIN"));
-      setProktors(data.filter((user) => user.role === "PROKTOR"));
-    }
-    fetchUsers();
-  }, []);
+  // Menggunakan SWR dengan fungsi getUsers
+  const {
+    data: rawData,
+    error,
+    mutate,
+  } = useSWR("users", fetchUsers, {
+    refreshInterval: 1000, // Polling setiap 1 detik
+  });
+
+  const { admins, proktors } = React.useMemo(() => {
+    if (!rawData) return { admins: [], proktors: [] };
+
+    const formattedData = rawData.map((user: any) => ({
+      id: user.id,
+      username: user.username || "",
+      role: user.role,
+      kelasId: user.kelas
+        ? {
+            id: user.kelas.id,
+            tingkat: user.kelas.tingkat,
+            jurusan: user.kelas.jurusan || "",
+          }
+        : undefined,
+      image: user.image || "",
+    }));
+
+    return {
+      admins: formattedData.filter((user: UsersData) => user.role === "ADMIN"),
+      proktors: formattedData.filter(
+        (user: UsersData) => user.role === "PROKTOR"
+      ),
+    };
+  }, [rawData]);
 
   const handleDelete = async (
     selectedIds: string[],
     setSelected: React.Dispatch<React.SetStateAction<string[]>>
   ) => {
     try {
-      // Contoh delete logic jika dibutuhkan
       const response = await deleteUsers(selectedIds);
-      setAdmins((prev) => prev.filter((row) => !selectedIds.includes(row.id)));
-      setProktors((prev) =>
-        prev.filter((row) => !selectedIds.includes(row.id))
-      );
-      setSelected([]);
-
       if (response.success) {
+        await mutate();
+        setSelected([]);
         toast.success(response.message);
       }
     } catch (error) {
       console.error("Error deleting users", error);
+      toast.error("Gagal menghapus user");
     }
   };
+
+  if (error) {
+    toast.error("Gagal memuat data");
+    return <div>Error loading data...</div>;
+  }
 
   return (
     <Box sx={{ width: "100%" }}>
@@ -98,10 +124,10 @@ export default function DataUsers() {
         selected={selectedAdmins}
         setSelected={setSelectedAdmins}
         handleDelete={() => handleDelete(selectedAdmins, setSelectedAdmins)}
-        page={page}
-        setPage={setPage}
-        rowsPerPage={rowsPerPage}
-        setRowsPerPage={setRowsPerPage}
+        page={pageAdmins}
+        setPage={setPageAdmins}
+        rowsPerPage={rowsPerPageAdmins}
+        setRowsPerPage={setRowsPerPageAdmins}
       />
       <UserTable
         title="Data Akses Proktor"
@@ -109,13 +135,27 @@ export default function DataUsers() {
         selected={selectedProktors}
         setSelected={setSelectedProktors}
         handleDelete={() => handleDelete(selectedProktors, setSelectedProktors)}
-        page={page}
-        setPage={setPage}
-        rowsPerPage={rowsPerPage}
-        setRowsPerPage={setRowsPerPage}
+        page={pageProktors}
+        setPage={setPageProktors}
+        rowsPerPage={rowsPerPageProktors}
+        setRowsPerPage={setRowsPerPageProktors}
       />
     </Box>
   );
+}
+
+// UserTable component remains the same but with added mutate prop
+interface UserTableProps {
+  title: string;
+  users: UsersData[];
+  selected: string[];
+  setSelected: React.Dispatch<React.SetStateAction<string[]>>;
+  handleDelete: () => void;
+  page: number;
+  setPage: React.Dispatch<React.SetStateAction<number>>;
+  rowsPerPage: number;
+  setRowsPerPage: React.Dispatch<React.SetStateAction<number>>;
+  // mutate: () => Promise<any>;
 }
 
 // Reusable User Table Component
@@ -129,17 +169,7 @@ function UserTable({
   setPage,
   rowsPerPage,
   setRowsPerPage,
-}: {
-  title: string;
-  users: UsersData[];
-  selected: string[];
-  setSelected: React.Dispatch<React.SetStateAction<string[]>>;
-  handleDelete: () => void;
-  page: number;
-  setPage: React.Dispatch<React.SetStateAction<number>>;
-  rowsPerPage: number;
-  setRowsPerPage: React.Dispatch<React.SetStateAction<number>>;
-}) {
+}: UserTableProps) {
   const isSelected = (id: string) => selected.includes(id);
 
   const handleClick = (event: React.MouseEvent<unknown>, id: string) => {
@@ -257,7 +287,7 @@ function UserTable({
         </Table>
       </TableContainer>
       <TablePagination
-        rowsPerPageOptions={[5, 10, 25]}
+        rowsPerPageOptions={[2, 5, 10, 25]}
         component="div"
         count={users.length}
         rowsPerPage={rowsPerPage}

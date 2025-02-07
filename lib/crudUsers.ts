@@ -1,10 +1,10 @@
 "use server";
 import { auth } from "@/auth";
-import { AddUserSchema } from "@/lib/zod";
+import { AddUserSchema, UpdateUsersSchema } from "@/lib/zod";
 import { revalidateTag } from "next/cache";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { prisma } from "./prisma";
+import { prisma } from "@/lib/prisma";
 
 export const AddUser = async (prevState: unknown, formData: FormData) => {
   try {
@@ -124,7 +124,60 @@ export const deleteUsers = async (ids: string[]) => {
   }
 };
 
-// export const updateUsers = async (prevState: unknown, formData: FormData) => {
-//   try {
-//   } catch (error) {}
-// };
+export const updateUsers = async (prevState: unknown, formData: FormData) => {
+  try {
+    const validateFields = UpdateUsersSchema.safeParse(
+      Object.fromEntries(formData.entries())
+    );
+
+    if (!validateFields.success) {
+      return {
+        error: validateFields.error.flatten().fieldErrors,
+      };
+    }
+
+    const { id, username, role, kelasId, password } = validateFields.data;
+    const apiUrl = process.env.NEXT_URL_API_URL || "http://localhost:3000";
+    const cookieStore = await cookies();
+    const sessionCookie = cookieStore.get("next-auth.session-token");
+
+    const bodyData = {
+      id,
+      username,
+      role,
+      ...(kelasId && { kelasId }),
+      ...(password && { password }),
+    };
+
+    const response = await fetch(`${apiUrl}/api/user/${id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Cookie: `next-auth.session-token=${sessionCookie?.value}`,
+      },
+      body: JSON.stringify(bodyData),
+      credentials: "include",
+    });
+
+    const responseData = await response.json();
+
+    if (!response.ok) {
+      throw new Error(responseData.message || "Gagal mengupdate data");
+    }
+
+    revalidateTag("users");
+
+    return {
+      success: true,
+      data: responseData.data,
+      message: "Berhasil mengupdate users",
+    };
+  } catch (error) {
+    console.error("Error saat update:", error);
+    return {
+      error: {
+        server: (error as Error).message || "Terjadi kesalahan pada server",
+      },
+    };
+  }
+};

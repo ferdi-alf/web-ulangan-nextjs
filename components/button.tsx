@@ -60,6 +60,10 @@ export const TokenButton = () => {
   );
 };
 
+const handleModalClick = (event: React.MouseEvent) => {
+  event.stopPropagation(); // Mencegah event bubbling ke elemen induk
+};
+
 export const FormButton = () => {
   const { pending } = useFormStatus();
   return (
@@ -71,6 +75,7 @@ export const FormButton = () => {
         </div>
       ) : null}
       <button
+        onClick={handleModalClick}
         className="p-3 hover:bg-blue-700 font-semibold bg-blue-500 rounded-md uppercase text-lg text-white w-full mt-10"
         type="submit"
       >

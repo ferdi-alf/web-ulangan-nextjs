@@ -32,3 +32,24 @@ export const AddUserSchema = z
       });
     }
   });
+
+export const UpdateUsersSchema = z.object({
+  id: z.string({
+    required_error: "ID user diperlukan",
+  }),
+  username: z
+    .string({
+      required_error: "Username diperlukan ",
+    })
+    .min(3, "Username minimal 3 karakter "),
+  role: z.enum(["ADMIN", "PROKTOR"], {
+    required_error: "Role harus dipilih",
+  }),
+  kelasId: z.string().optional(),
+  password: z
+    .union([
+      z.string().min(6, "Password minimal 6 karakter"),
+      z.string().length(0), // Mengizinkan string kosong
+    ])
+    .optional(),
+});
