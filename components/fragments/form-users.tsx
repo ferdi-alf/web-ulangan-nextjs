@@ -13,9 +13,28 @@ import {
 import { Kelas } from "@prisma/client";
 import { getKelas } from "@/lib/crudKelas";
 
-const FormInputUsers = ({ state }: { state: any }) => {
-  console.log("state", state);
-  const [selectedRole, setSelectedRole] = React.useState("");
+interface KelasId {
+  id: string;
+  tingkat: string;
+  jurusan: string;
+}
+
+interface UserData {
+  id: string;
+  username: string;
+  role: string;
+  kelasId?: KelasId;
+  image?: string;
+}
+
+const FormInputUsers = ({
+  state,
+  initialData,
+}: {
+  state: any;
+  initialData: UserData;
+}) => {
+  const [selectedRole, setSelectedRole] = React.useState(initialData?.role);
   const [classes, setClasses] = React.useState<Kelas[]>([]);
 
   const usernameError = Array.isArray(state?.error?.username)
@@ -24,9 +43,9 @@ const FormInputUsers = ({ state }: { state: any }) => {
   const roleError = Array.isArray(state?.error?.role)
     ? state.error.role[0]
     : state?.error?.role;
-  const kelasError = Array.isArray(state?.error?.kelas)
-    ? state.error.kelas[0]
-    : state?.error?.kelas;
+  const kelasError = Array.isArray(state?.error?.kelasId)
+    ? state.error.kelasId[0]
+    : state?.error?.kelasId;
   const passwordError = Array.isArray(state?.error?.password)
     ? state.error.password[0]
     : state?.error?.password;
@@ -56,13 +75,13 @@ const FormInputUsers = ({ state }: { state: any }) => {
           "& .MuiInput-root": {
             backgroundColor: "transparent",
             "&:before": {
-              borderBottom: "1px solid rgba(0, 0, 0, 0.42)", // Warna hitam saat tidak fokus
+              borderBottom: "1px solid rgba(0, 0, 0, 0.42)",
             },
             "&:hover:not(.Mui-disabled):before": {
               borderBottom: "2px solid rgba(0, 0, 0, 0.87)",
             },
             "&:after": {
-              borderBottom: "2px solid #3b82f6", // Warna biru-500 untuk border bottom saat focus
+              borderBottom: "2px solid #3b82f6",
             },
             "& input": {
               color: "inherit",
@@ -75,9 +94,9 @@ const FormInputUsers = ({ state }: { state: any }) => {
             },
           },
           "& .MuiInputLabel-root": {
-            color: "rgba(0, 0, 0, 0.7)", // Warna hitam saat tidak fokus
+            color: "rgba(0, 0, 0, 0.7)",
             "&.Mui-focused": {
-              color: "#3b82f6", // Warna biru-500 saat focus
+              color: "#3b82f6",
             },
           },
           "& .MuiFormHelperText-root": {
@@ -90,6 +109,7 @@ const FormInputUsers = ({ state }: { state: any }) => {
           placeholder="Masukan username"
           name="username"
           id="component-error"
+          defaultValue={initialData?.username}
           aria-describedby="component-error-text"
         />
         <FormHelperText id="component-error-text">
@@ -103,7 +123,7 @@ const FormInputUsers = ({ state }: { state: any }) => {
       <select
         id="role"
         name="role"
-        defaultValue=""
+        value={selectedRole}
         onChange={(e) => setSelectedRole(e.target.value)}
         className={`bg-gray-50 border ${
           roleError ? "border-red-500" : "border-gray-300"
@@ -118,7 +138,7 @@ const FormInputUsers = ({ state }: { state: any }) => {
       {roleError && <p className="text-red-500">{roleError}</p>}
 
       {selectedRole === "PROKTOR" && (
-        <Select name="kelas">
+        <Select name="kelasId" defaultValue={initialData.kelasId?.id}>
           <p className="mt-4 mb-2 text-start text-gray-500 text-sm">
             Harap pilih kelas untuk menentukan kelas yang di awasi Proktor
           </p>
@@ -128,10 +148,10 @@ const FormInputUsers = ({ state }: { state: any }) => {
             <SelectValue placeholder="Pilih Kelas" />
           </SelectTrigger>
           <SelectContent>
-            {Object.entries(groupClasses).map(([tingkat, tingkaatClasses]) => (
+            {Object.entries(groupClasses).map(([tingkat, tingkatClasses]) => (
               <SelectGroup key={tingkat}>
-                <SelectLabel>Tingka {tingkat}</SelectLabel>
-                {tingkaatClasses.map((Kelas) => (
+                <SelectLabel>Tingkat {tingkat}</SelectLabel>
+                {tingkatClasses.map((Kelas) => (
                   <SelectItem key={Kelas.id} value={Kelas.id.toString()}>
                     {Kelas.tingkat} {Kelas.jurusan}
                   </SelectItem>
@@ -154,13 +174,13 @@ const FormInputUsers = ({ state }: { state: any }) => {
           "& .MuiInput-root": {
             backgroundColor: "transparent",
             "&:before": {
-              borderBottom: "1px solid rgba(0, 0, 0, 0.42)", // Warna hitam saat tidak fokus
+              borderBottom: "1px solid rgba(0, 0, 0, 0.42)",
             },
             "&:hover:not(.Mui-disabled):before": {
               borderBottom: "2px solid rgba(0, 0, 0, 0.87)",
             },
             "&:after": {
-              borderBottom: "2px solid #3b82f6", // Warna biru-500 untuk border bottom saat focus
+              borderBottom: "2px solid #3b82f6",
             },
             "& input": {
               color: "inherit",
@@ -173,9 +193,9 @@ const FormInputUsers = ({ state }: { state: any }) => {
             },
           },
           "& .MuiInputLabel-root": {
-            color: "rgba(0, 0, 0, 0.7)", // Warna hitam saat tidak fokus
+            color: "rgba(0, 0, 0, 0.7)",
             "&.Mui-focused": {
-              color: "#3b82f6", // Warna biru-500 saat focus
+              color: "#3b82f6",
             },
           },
           "& .MuiFormHelperText-root": {
@@ -186,7 +206,11 @@ const FormInputUsers = ({ state }: { state: any }) => {
         <InputLabel htmlFor="component-error">Password</InputLabel>
         <Input
           type="password"
-          placeholder="Masukan password"
+          placeholder={
+            initialData?.id
+              ? "Masukan password baru (Opsional)"
+              : "Masukan password"
+          }
           name="password"
           id="component-error"
           aria-describedby="component-error-text"

@@ -17,13 +17,16 @@ export const AddUserSchema = z
   .object({
     username: z.string().nonempty({ message: "username tidak boleh kosong" }),
     role: Role,
-    kelas: z.string().optional(),
+    kelasId: z.string().optional(), // sesuaikan dengan model dan form
     password: z.string().min(8, "password harus berisi minimal 8 karakter"),
   })
   .superRefine((data, ctx) => {
-    if (data.role === "PROKTOR" && (!data.kelas || data.kelas.trim() === "")) {
+    if (
+      data.role === "PROKTOR" &&
+      (!data.kelasId || data.kelasId.trim() === "")
+    ) {
       ctx.addIssue({
-        path: ["kelas"],
+        path: ["kelasId"],
         message: "Kelas wajib dipilih untuk role Proktor",
         code: "custom",
       });

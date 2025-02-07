@@ -14,8 +14,23 @@ import { useActionState, useEffect } from "react";
 import FormInputUsers from "../fragments/form-users";
 import { AddUser } from "@/lib/crudUsers";
 import { toast } from "react-toastify";
+import { SquarePen } from "lucide-react";
 
-const ModalInputUsers = () => {
+interface KelasId {
+  id: string;
+  tingkat: string;
+  jurusan: string;
+}
+
+interface UserData {
+  id: string;
+  username: string;
+  role: string;
+  kelasId?: KelasId;
+  image?: string;
+}
+
+const ModalUpdateUsers = ({ userData }: { userData: UserData }) => {
   const [state, formAction] = useActionState(AddUser, null);
   console.log("pesan", state);
 
@@ -39,17 +54,18 @@ const ModalInputUsers = () => {
 
   return (
     <Dialog>
-      <div className="flex w-full justify-end mb-5">
-        <DialogTrigger className="p-2 shadow-md rounded-md text-lg text-white bg-blue-500">
-          Tambah Users +
-        </DialogTrigger>
-      </div>
+      <DialogTrigger className="p-2 flex flex-wrap items-center gap-x-1 shadow-md rounded-md text-sm font-bold text-white bg-blue-500">
+        <SquarePen className="text-xs" />
+        <p>Update</p>
+      </DialogTrigger>
       <DialogContent className="w-11/12">
         <DialogHeader>
-          <DialogTitle>Tambah Data Kelas</DialogTitle>
-          <DialogDescription>Tambahkan daftar kelas yang ada</DialogDescription>
+          <DialogTitle>Edit Data Users</DialogTitle>
+          <DialogDescription>
+            Edit data {userData.role} - {userData.username}{" "}
+          </DialogDescription>
           <form action={formAction}>
-            <FormInputUsers state={state} />
+            <FormInputUsers state={state} initialData={userData} />
             <DialogFooter className="mt-10">
               <FormButton />
             </DialogFooter>
@@ -60,4 +76,4 @@ const ModalInputUsers = () => {
   );
 };
 
-export default ModalInputUsers;
+export default ModalUpdateUsers;

@@ -1,10 +1,11 @@
 import ModalInputUsers from "@/components/dialog/ModalInputUsers";
+import DataUsers from "@/components/table/data-user";
 
 const UserPage = () => {
   return (
-    <div className="w-full flex justify-end">
-      <p>Hello</p>
+    <div className="w-full flex justify-center flex-col">
       <ModalInputUsers />
+      <DataUsers />
     </div>
   );
 };
