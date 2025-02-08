@@ -54,7 +54,6 @@ const fetchUsers = async () => {
 export default function DataUsers() {
   const [selectedAdmins, setSelectedAdmins] = React.useState<string[]>([]);
   const [selectedProktors, setSelectedProktors] = React.useState<string[]>([]);
-
   const [pageAdmins, setPageAdmins] = React.useState(0);
   const [rowsPerPageAdmins, setRowsPerPageAdmins] = React.useState(5);
   const [pageProktors, setPageProktors] = React.useState(0);

@@ -58,6 +58,10 @@ const FormInputUsers = ({
     fetchKelas();
   }, []);
 
+  const handleModalClick = (event: React.MouseEvent) => {
+    event.stopPropagation(); // Mencegah event bubbling ke elemen induk
+  };
+
   const groupClasses: Record<string, Kelas[]> = classes.reduce((acc, kelas) => {
     if (!acc[kelas.tingkat]) acc[kelas.tingkat] = [];
     acc[kelas.tingkat].push(kelas);
@@ -107,6 +111,7 @@ const FormInputUsers = ({
       >
         <InputLabel htmlFor="component-error">Username</InputLabel>
         <Input
+          onClick={handleModalClick}
           placeholder="Masukan username"
           name="username"
           id="component-error"
@@ -123,6 +128,7 @@ const FormInputUsers = ({
       </label>
       <select
         id="role"
+        onClick={handleModalClick}
         name="role"
         value={selectedRole}
         onChange={(e) => setSelectedRole(e.target.value)}
@@ -206,6 +212,7 @@ const FormInputUsers = ({
       >
         <InputLabel htmlFor="component-error">Password</InputLabel>
         <Input
+          onClick={handleModalClick}
           type="password"
           placeholder={
             initialData?.id
