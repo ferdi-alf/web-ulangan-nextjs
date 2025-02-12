@@ -21,7 +21,7 @@ import { deleteKelas, getKelas } from "@/lib/crudKelas";
 import { toast } from "react-toastify";
 import useSWR from "swr";
 import Swal from "sweetalert2";
-import TableLoading from "../skeleton/Table-loading";
+import TableLoading from "@/components/skeleton/Table-loading";
 
 interface KelasData {
   id: string;
@@ -57,7 +57,6 @@ export default function EnhancedTable() {
     return <TableLoading />;
   }
 
-  // console.log("rawData", rawData);
   const formattedData = rawData
     ? rawData.map((kelas: KelasData) => ({
         id: kelas.id,

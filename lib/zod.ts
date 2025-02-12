@@ -33,23 +33,73 @@ export const AddUserSchema = z
     }
   });
 
-export const UpdateUsersSchema = z.object({
-  id: z.string({
-    required_error: "ID user diperlukan",
+export const UpdateUsersSchema = z
+  .object({
+    id: z.string({
+      required_error: "ID user diperlukan",
+    }),
+    username: z
+      .string({
+        required_error: "Username diperlukan ",
+      })
+      .min(3, "Username minimal 3 karakter "),
+    role: z.enum(["ADMIN", "PROKTOR"], {
+      required_error: "Role harus dipilih",
+    }),
+    kelasId: z.string().optional(),
+    password: z
+      .union([
+        z.string().min(6, "Password minimal 6 karakter"),
+        z.string().length(0), // Mengizinkan string kosong
+      ])
+      .optional(),
+  })
+  .superRefine((data, ctx) => {
+    if (
+      data.role === "PROKTOR" &&
+      (!data.kelasId || data.kelasId.trim() === "")
+    ) {
+      ctx.addIssue({
+        path: ["kelasId"],
+        message: "Kelas wajib dipilih untuk role Proktor",
+        code: "custom",
+      });
+    }
+  });
+
+export const AddSiswaSchema = z.object({
+  kelasId: z.string({
+    required_error: "Kelas harus dipilih",
   }),
-  username: z
-    .string({
-      required_error: "Username diperlukan ",
-    })
-    .min(3, "Username minimal 3 karakter "),
-  role: z.enum(["ADMIN", "PROKTOR"], {
-    required_error: "Role harus dipilih",
-  }),
-  kelasId: z.string().optional(),
-  password: z
-    .union([
-      z.string().min(6, "Password minimal 6 karakter"),
-      z.string().length(0), // Mengizinkan string kosong
-    ])
-    .optional(),
+  siswaData: z
+    .array(
+      z.object({
+        name: z
+          .string({
+            required_error: "Nama harus diisi",
+          })
+          .min(3, "Nama minimal 3 karakter"),
+        nis: z
+          .string({
+            required_error: "NIS/NISN harus diisi",
+          })
+          .min(5, "NIS/NISN minimal 5 karakter"),
+        ruang: z.string({
+          required_error: "Ruang harus diisi",
+        }),
+        kelamin: z.enum(["L", "P"], {
+          required_error: "Jenis kelamin harus dipilih",
+        }),
+        nomorUjian: z.string({
+          required_error: "Nomor ujian harus diisi",
+        }),
+        password: z
+          .string({
+            required_error: "Password harus diisi",
+          })
+          .min(5, "Password minimal 5 karakter"),
+      })
+    )
+    .min(1, "Minimal harus ada 1 data siswa"),
 });
+export type AddSiswaInput = z.infer<typeof AddSiswaSchema>;

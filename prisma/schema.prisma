@@ -84,13 +84,21 @@ model User {
 }
 
 
+enum Kelamin {
+  L
+  P
+}
+
 
 model SiswaDetail {
   id          String   @id @default(cuid())
   userId      String   @unique
   name        String
   kelasId     String
-  tanggalLahir DateTime
+  nis         String
+  kelamin     Kelamin
+  nomor_ujian String
+  ruang       String
   status      String   @default("AKTIF")
 
   kelas Kelas @relation(fields: [kelasId], references: [id], onDelete: Cascade)

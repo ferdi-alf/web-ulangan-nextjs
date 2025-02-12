@@ -92,7 +92,7 @@ const SideItems = () => {
             {item.subItems ? (
               <>
                 <div
-                  className="p-2 hover:bg-slate-50 cursor-pointer"
+                  className="p-2 "
                   // onClick={() => handleDropdownClick(item.title)} // Menggunakan fungsi umum
                 >
                   <div className="flex justify-between">
@@ -113,7 +113,9 @@ const SideItems = () => {
                   {item.subItems.map((subItem) => (
                     <div
                       key={subItem.title}
-                      className="p-2 border-l hover:bg-slate-200"
+                      className={`p-2 rounded-sm hover:bg-slate-50 ${
+                        pathname === subItem.url ? "bg-slate-100" : ""
+                      }`}
                     >
                       <Link href={subItem.url} className="flex gap-x-3">
                         <subItem.icon />

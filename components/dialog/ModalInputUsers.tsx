@@ -40,7 +40,7 @@ const ModalInputUsers = () => {
   return (
     <Dialog>
       <div className="flex w-full justify-end mb-5">
-        <DialogTrigger className="p-2 shadow-md rounded-md text-lg text-white bg-blue-500">
+        <DialogTrigger className="p-2  shadow-md rounded-md text-lg text-white bg-blue-500">
           Tambah Users +
         </DialogTrigger>
       </div>

@@ -25,6 +25,7 @@ import { toast } from "react-toastify";
 import Image from "next/image";
 import { deleteUsers, getUsers } from "@/lib/crudUsers";
 import ModalUpdateUsers from "@/components/dialog/ModalUpdateUsers";
+import TableLoading from "@/components/skeleton/Table-loading";
 
 interface KelasId {
   id: string;
@@ -64,6 +65,7 @@ export default function DataUsers() {
     data: rawData,
     error,
     mutate,
+    isLoading,
   } = useSWR("users", fetchUsers, {
     refreshInterval: 1000, // Polling setiap 1 detik
   });
@@ -92,6 +94,10 @@ export default function DataUsers() {
       ),
     };
   }, [rawData]);
+
+  if (isLoading) {
+    return <TableLoading />;
+  }
 
   const handleDelete = async (
     selectedIds: string[],
@@ -269,7 +275,7 @@ function UserTable({
                     {/* Hanya tampil di tabel Proktor */}
                     {title === "Data Akses Proktor" && (
                       <>
-                        <TableCell>
+                        <TableCell className="truncate">
                           {row.kelasId?.tingkat || "-"} {" - "}
                           {row.kelasId?.jurusan || "-"}
                         </TableCell>

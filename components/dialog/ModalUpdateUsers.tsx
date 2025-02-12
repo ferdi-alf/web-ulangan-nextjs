@@ -60,9 +60,9 @@ const ModalUpdateUsers = ({ userData }: { userData: UserData }) => {
     <Dialog>
       <DialogTrigger
         onClick={handleModalClick}
-        className="p-2 flex flex-wrap items-center gap-x-1 shadow-md rounded-md text-sm font-bold text-white bg-blue-500"
+        className="p-2 flex flex-nowrap items-center gap-x-1 shadow-md rounded-md text-sm font-bold text-white bg-blue-500"
       >
-        <SquarePen className="text-xs" />
+        <SquarePen className="text-xs " />
         <p>Update</p>
       </DialogTrigger>
       <DialogContent className="w-11/12">
