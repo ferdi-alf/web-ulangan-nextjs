@@ -143,3 +143,55 @@ export const getSiswa = async () => {
     return [];
   }
 };
+
+export const deleteSiswa = async (ids: string[]) => {
+  const session = await auth();
+  const notRole = !(
+    session?.user?.role === "ADMIN" || session?.user?.role === "SUPERADMIN"
+  );
+
+  if (!session || notRole) {
+    throw new Error("Unauthoaized");
+  }
+
+  try {
+    const siswaDetails = await prisma.siswaDetail.findMany({
+      where: {
+        id: {
+          in: ids,
+        },
+      },
+      select: {
+        userId: true,
+      },
+    });
+
+    const userIds = siswaDetails.map((detail) => detail.userId);
+
+    await prisma.$transaction([
+      prisma.siswaDetail.deleteMany({
+        where: {
+          id: {
+            in: ids,
+          },
+        },
+      }),
+
+      prisma.user.deleteMany({
+        where: {
+          id: {
+            in: userIds,
+          },
+        },
+      }),
+    ]);
+
+    return {
+      success: true,
+      message: "Berhasil menghapus data siswa",
+    };
+  } catch (error) {
+    console.log("Error deleting Siswa:", error);
+    throw new Error("Failed to delete siswa");
+  }
+};

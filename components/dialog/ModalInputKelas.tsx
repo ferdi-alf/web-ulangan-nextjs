@@ -13,26 +13,29 @@ import FormKelas from "@/components/fragments/form-kelas";
 import { FormButton } from "../button";
 import { useActionState, useEffect } from "react";
 import { AddKelas } from "@/lib/crudKelas";
-import { toast } from "react-toastify";
+import { mutate } from "swr";
+import {
+  showErrorToast,
+  showSuccessToast,
+} from "@/components/toast/ToastSuccess";
 
 const ModalInputKelas = () => {
   const [state, formAction] = useActionState(AddKelas, null);
 
   useEffect(() => {
     if (state?.success) {
-      toast.success(state.message, {
-        position: "top-right",
-        autoClose: 5000,
-        theme: "colored",
-      });
-    } else if (state?.error) {
-      const errorMessage = state.error.server;
+      mutate("kelas");
+    }
+  }, [state]);
 
-      toast.error(errorMessage, {
-        position: "top-right",
-        autoClose: 5000,
-        theme: "colored",
-      });
+  useEffect(() => {
+    if (state?.success) {
+      showSuccessToast(state.message);
+    } else if (state?.error) {
+      const errorMessage =
+        "server" in state.error ? state.error.server : "Unknown error";
+
+      showErrorToast(errorMessage);
     }
   }, [state]);
 

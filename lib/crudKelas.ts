@@ -102,7 +102,7 @@ export const deleteKelas = async (ids: string[]) => {
         },
       },
     });
-
+    revalidateTag("kelas");
     return { success: true, message: "Kelas berhasil dihapus" };
   } catch (error) {
     console.error("Error deleting kelas:", error);

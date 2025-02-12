@@ -3,7 +3,6 @@
 import { getKelas } from "@/lib/crudKelas";
 import { Kelas } from "@prisma/client";
 import React, { useActionState, useEffect } from "react";
-import { toast } from "react-toastify";
 import {
   Select,
   SelectContent,
@@ -27,6 +26,10 @@ import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import { AddSiswa } from "@/lib/crudSiswa";
 import { X } from "lucide-react";
 import * as XLSX from "xlsx";
+import {
+  showErrorToast,
+  showSuccessToast,
+} from "@/components/toast/ToastSuccess";
 
 interface InputGroup {
   id: number;
@@ -74,47 +77,30 @@ const FormInputSiswa = () => {
     ]);
     setSelectedKelas(null);
     setShowPassword({});
+    setSelectedFile(null);
   }, []);
 
-  // Handle success and error notifications
   useEffect(() => {
     if (state?.success) {
       if (!selectedKelas) return; // Pastikan selectedKelas sudah tersedia sebelum toast
 
       const kelasName = `${selectedKelas.tingkat} ${selectedKelas.jurusan}`;
 
-      toast.success(
-        `Berhasil menambahkan data siswa untuk kelas ${kelasName}`,
-        {
-          position: "top-right",
-          autoClose: 5000,
-          theme: "colored",
-        }
+      showSuccessToast(
+        `Berhasil menambahkan data siswa untuk kelas ${kelasName}`
       );
 
       resetFormm();
     } else if (state?.error) {
       if ("message" in state.error) {
-        toast.error(state.error.message, {
-          position: "top-right",
-          autoClose: 5000,
-          theme: "colored",
-        });
+        showErrorToast(state.error.message || "Error");
       } else if ("server" in state.error) {
-        toast.error(state.error.server, {
-          position: "top-right",
-          autoClose: 5000,
-          theme: "colored",
-        });
+        showErrorToast(state.error.server);
       } else if (state.error.kelasId && !selectedKelas) {
         if (!kelasError) {
           // Hanya tampilkan error jika belum pernah muncul
           setKelasError(state.error.kelasId[0]);
-          toast.error(state.error.kelasId[0], {
-            position: "top-right",
-            autoClose: 5000,
-            theme: "colored",
-          });
+          showErrorToast(state.error.kelasId[0]);
         }
       }
     }
@@ -193,13 +179,8 @@ const FormInputSiswa = () => {
         if (data && data.length > 0) {
           // Update batas menjadi 40
           if (data.length > 40) {
-            toast.warning(
-              `Data yang dapat diimport maksimal 40 siswa per batch. Data akan dipotong.`,
-              {
-                position: "top-right",
-                autoClose: 5000,
-                theme: "colored",
-              }
+            showErrorToast(
+              `Data yang dapat diimport maksimal 40 siswa per batch. Data akan dipotong.`
             );
           }
 
@@ -242,13 +223,8 @@ const FormInputSiswa = () => {
           );
 
           if (!hasValidData) {
-            toast.error(
-              "Format kolom file Excel tidak sesuai. Pastikan file memiliki minimal salah satu kolom berikut: Nama Siswa, NIS, Ruang, Jenis Kelamin, Nomor Ujian, atau Password.",
-              {
-                position: "top-right",
-                autoClose: 7000,
-                theme: "colored",
-              }
+            showErrorToast(
+              "Format kolom file Excel tidak sesuai. Pastikan file memiliki minimal salah satu kolom berikut: Nama Siswa, NIS, Ruang, Jenis Kelamin, Nomor Ujian, atau Password."
             );
             return;
           }
@@ -272,40 +248,22 @@ const FormInputSiswa = () => {
           }
 
           if (missingColumns.length > 0) {
-            toast.error(
-              `Kolom wajib tidak ditemukan: ${missingColumns.join(", ")}`,
-              {
-                position: "top-right",
-                autoClose: 7000,
-                theme: "colored",
-              }
+            showErrorToast(
+              `Kolom wajib tidak ditemukan: ${missingColumns.join(", ")}`
             );
             return;
           }
 
           setInputGroups(newInputGroups);
-          toast.success(
-            `Berhasil mengimpor ${limitedData.length} data dari ${data.length} total data, harap periksa kembali`,
-            {
-              position: "top-right",
-              autoClose: 5000,
-              theme: "colored",
-            }
+          showSuccessToast(
+            `Berhasil mengimpor ${limitedData.length} data dari ${data.length} total data, harap periksa kembali`
           );
         } else {
-          toast.error("File Excel kosong atau tidak memiliki data.", {
-            position: "top-right",
-            autoClose: 5000,
-            theme: "colored",
-          });
+          showErrorToast("File Excel kosong atau tidak memiliki data.");
         }
       } catch (error) {
         console.error("Error reading Excel file:", error);
-        toast.error("Error membaca file Excel. Periksa format file.", {
-          position: "top-right",
-          autoClose: 5000,
-          theme: "colored",
-        });
+        showErrorToast("Error membaca file Excel. Periksa format file.");
       }
     }
   };

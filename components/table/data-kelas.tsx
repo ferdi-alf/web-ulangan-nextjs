@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import * as React from "react";
 import { alpha } from "@mui/material/styles";
@@ -18,10 +19,11 @@ import Tooltip from "@mui/material/Tooltip";
 import DeleteIcon from "@mui/icons-material/Delete";
 import FilterListIcon from "@mui/icons-material/FilterList";
 import { deleteKelas, getKelas } from "@/lib/crudKelas";
-import { toast } from "react-toastify";
-import useSWR from "swr";
+import useSWR, { useSWRConfig } from "swr";
 import Swal from "sweetalert2";
 import TableLoading from "@/components/skeleton/Table-loading";
+import toast from "react-hot-toast";
+import { showErrorToast, showSuccessToast } from "../toast/ToastSuccess";
 
 interface KelasData {
   id: string;
@@ -43,15 +45,14 @@ export default function EnhancedTable() {
   const [selected, setSelected] = React.useState<string[]>([]);
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
+  const { mutate } = useSWRConfig();
 
   const {
     data: rawData,
     error,
-    mutate,
+    // mutate,
     isLoading,
-  } = useSWR("kelas", fetchKelas, {
-    refreshInterval: 1000,
-  });
+  } = useSWR("kelas", fetchKelas);
 
   if (isLoading) {
     return <TableLoading />;
@@ -74,19 +75,20 @@ export default function EnhancedTable() {
     selectedIds: string[],
     setSelected: React.Dispatch<React.SetStateAction<string[]>>
   ) => {
-    if (selected.length === 0) return;
-    const seledtedClasses = formattedData.filter((kelas) =>
+    if (selectedIds.length === 0) return;
+
+    const selectedClasses = formattedData.filter((kelas) =>
       selectedIds.includes(kelas.id)
     );
 
-    const classNames = seledtedClasses
+    const classNames = selectedClasses
       .map((kelas) => `${kelas.tingkat} ${kelas.jurusan}`)
       .join(", ");
 
     const result = await Swal.fire({
       icon: "warning",
       title: "Apakah Anda yakin?",
-      text: `jika Anda menghapus kelas ${classNames}, semua yang berelasi dengan kelas ini termasuk siswa dan proktor akan terhapus`,
+      text: `Jika Anda menghapus kelas ${classNames}, semua yang berelasi dengan kelas ini termasuk siswa dan proktor akan terhapus.`,
       showCancelButton: true,
       confirmButtonText: "Ya, hapus!",
       cancelButtonText: "Cancel",
@@ -95,17 +97,29 @@ export default function EnhancedTable() {
 
     if (result.isConfirmed) {
       try {
+        mutate(
+          "kelas",
+          (currentData: any) =>
+            currentData?.filter(
+              (kelas: any) => !selectedIds.includes(kelas.id)
+            ),
+          false
+        );
+
         const response = await deleteKelas(selectedIds);
-        console.log(response);
 
         if (response.success) {
-          await mutate();
+          mutate("kelas");
           setSelected([]);
-          toast.success(response.message);
+          showSuccessToast(response.message);
+        } else {
+          throw new Error(response.message);
         }
       } catch (error) {
         console.error(error);
-        toast.error("Gagal menghapus data");
+        showErrorToast("Gagal menghapus data");
+
+        mutate("kelas");
       }
     }
   };

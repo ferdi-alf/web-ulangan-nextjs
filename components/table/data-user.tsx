@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import * as React from "react";
-import useSWR from "swr";
+import useSWR, { useSWRConfig } from "swr";
 import {
   Box,
   Paper,
@@ -21,11 +21,11 @@ import {
 import DeleteIcon from "@mui/icons-material/Delete";
 import FilterListIcon from "@mui/icons-material/FilterList";
 import { alpha } from "@mui/material/styles";
-import { toast } from "react-toastify";
 import Image from "next/image";
 import { deleteUsers, getUsers } from "@/lib/crudUsers";
 import ModalUpdateUsers from "@/components/dialog/ModalUpdateUsers";
 import TableLoading from "@/components/skeleton/Table-loading";
+import { showErrorToast, showSuccessToast } from "../toast/ToastSuccess";
 
 interface KelasId {
   id: string;
@@ -61,14 +61,8 @@ export default function DataUsers() {
   const [rowsPerPageProktors, setRowsPerPageProktors] = React.useState(5);
 
   // Menggunakan SWR dengan fungsi getUsers
-  const {
-    data: rawData,
-    error,
-    mutate,
-    isLoading,
-  } = useSWR("users", fetchUsers, {
-    refreshInterval: 1000, // Polling setiap 1 detik
-  });
+  const { data: rawData, error, isLoading } = useSWR("users", fetchUsers);
+  const { mutate } = useSWRConfig();
 
   const { admins, proktors } = React.useMemo(() => {
     if (!rawData) return { admins: [], proktors: [] };
@@ -105,19 +99,25 @@ export default function DataUsers() {
   ) => {
     try {
       const response = await deleteUsers(selectedIds);
+      mutate(
+        "users",
+        (currentData: any) =>
+          currentData?.filter((kelas: any) => !selectedIds.includes(kelas.id)),
+        false // false = tidak fetch ulang langsung
+      );
       if (response.success) {
-        await mutate();
+        mutate("users");
         setSelected([]);
-        toast.success(response.message);
+        showSuccessToast(response.message);
       }
     } catch (error) {
       console.error("Error deleting users", error);
-      toast.error("Gagal menghapus user");
+      showErrorToast("Gagal menghapus data user");
     }
   };
 
   if (error) {
-    toast.error("Gagal memuat data");
+    showErrorToast("Gagal memuat data");
     return <div>Error loading data...</div>;
   }
 

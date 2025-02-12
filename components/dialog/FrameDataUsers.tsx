@@ -18,11 +18,16 @@ import {
   Typography,
 } from "@mui/material";
 import { MoveLeft } from "lucide-react";
-import { useState } from "react";
-import { toast } from "react-toastify";
+import { SetStateAction, useState } from "react";
 import FilterListIcon from "@mui/icons-material/FilterList";
 import DeleteIcon from "@mui/icons-material/Delete";
 import Image from "next/image";
+import { deleteSiswa } from "@/lib/crudSiswa";
+import Swal from "sweetalert2";
+import {
+  showErrorToast,
+  showSuccessToast,
+} from "@/components/toast/ToastSuccess";
 
 interface SiswaData {
   id: string;
@@ -100,12 +105,34 @@ const FrameDataUsers = ({
 
   const isSelected = (id: string) => selected.indexOf(id) !== -1;
 
-  const handleDelete = async () => {
-    try {
-      toast.success("Data Berhasil di hapus");
-    } catch (error) {
-      console.log(error);
-      toast.error("Gagal menghapus data");
+  const handleDelete = async (
+    selectedIds: string[],
+    setSelected: React.Dispatch<SetStateAction<string[]>>
+  ) => {
+    const result = await Swal.fire({
+      title: "Apa kamu yakin",
+      text: `Kamu akan menghapus ${selected.length} data dari kelas ${tingkat} - ${jurusan}`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Ya, hapus!",
+      cancelButtonText: "Batal",
+    });
+
+    if (result.isConfirmed) {
+      try {
+        const response = await deleteSiswa(selectedIds);
+        if (response.success) {
+          setSelected([]);
+          showSuccessToast(
+            `Berhasil menghapus ${selectedIds.length} data dari kelas ${tingkat} - ${jurusan}`
+          );
+        }
+      } catch (error) {
+        console.log(error);
+        showErrorToast("Gagal menghapus data");
+      }
     }
   };
 
@@ -176,7 +203,9 @@ const FrameDataUsers = ({
                     )}
                     {selected.length > 0 ? (
                       <Tooltip title="Delete">
-                        <IconButton onClick={handleDelete}>
+                        <IconButton
+                          onClick={() => handleDelete(selected, setSelected)}
+                        >
                           <DeleteIcon />
                         </IconButton>
                       </Tooltip>

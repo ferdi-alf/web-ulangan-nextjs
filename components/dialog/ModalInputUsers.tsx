@@ -13,27 +13,29 @@ import { FormButton } from "../button";
 import { useActionState, useEffect } from "react";
 import FormInputUsers from "../fragments/form-users";
 import { AddUser } from "@/lib/crudUsers";
-import { toast } from "react-toastify";
+import { mutate } from "swr";
+import {
+  showErrorToast,
+  showSuccessToast,
+} from "@/components/toast/ToastSuccess";
 
 const ModalInputUsers = () => {
   const [state, formAction] = useActionState(AddUser, null);
   console.log("pesan", state);
+  useEffect(() => {
+    if (state?.success) {
+      mutate("users");
+    }
+  }, [state]);
 
   useEffect(() => {
     if (state?.success) {
-      toast.success(state.message, {
-        position: "top-right",
-        autoClose: 5000,
-        theme: "colored",
-      });
+      showSuccessToast(state.message);
     } else if (state?.error) {
-      const errorMessage = state.error.server;
+      const errorMessage =
+        "server" in state.error ? state.error.server : "Unknown error";
 
-      toast.error(errorMessage, {
-        position: "top-right",
-        autoClose: 5000,
-        theme: "colored",
-      });
+      showErrorToast(errorMessage);
     }
   }, [state]);
 

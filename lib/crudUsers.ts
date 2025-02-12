@@ -113,7 +113,7 @@ export const deleteUsers = async (ids: string[]) => {
         },
       },
     });
-
+    revalidateTag("users");
     return {
       success: true,
       message: "Berhasil menghapus data Users",
