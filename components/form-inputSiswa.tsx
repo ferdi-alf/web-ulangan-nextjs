@@ -30,6 +30,7 @@ import {
   showErrorToast,
   showSuccessToast,
 } from "@/components/toast/ToastSuccess";
+import { mutate } from "swr";
 
 interface InputGroup {
   id: number;
@@ -62,6 +63,11 @@ const FormInputSiswa = () => {
   ]);
   const [kelasError, setKelasError] = React.useState<string | null>(null);
   const [selectedFile, setSelectedFile] = React.useState<File | null>(null);
+  useEffect(() => {
+    if (state?.success) {
+      mutate("siswa");
+    }
+  }, [state]);
 
   const resetFormm = React.useCallback(() => {
     setInputGroups([

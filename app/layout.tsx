@@ -3,9 +3,8 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/navbar";
-import { ToastContainer } from "react-toastify";
 import { usePathname } from "next/navigation";
-import "react-toastify/dist/ReactToastify.css";
+import { Toaster } from "react-hot-toast";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -36,21 +35,10 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased relative overflow-x-hidden bg-slate-100`}
       >
-        <ToastContainer
-          position="top-right"
-          autoClose={5000}
-          hideProgressBar={false}
-          newestOnTop={false}
-          closeOnClick
-          pauseOnFocusLoss
-          draggable
-          pauseOnHover
-          theme="colored"
-        />
-
         {!disabledNavbar.includes(pathname) && (
           <>
             <Navbar />
+            <Toaster position="top-right" />
 
             <div className="fixed et object-cover z-0 bottom-0 w-full h-[150px] ">
               <div className="waves">

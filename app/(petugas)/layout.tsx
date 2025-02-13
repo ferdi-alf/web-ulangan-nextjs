@@ -1,6 +1,5 @@
 // app/dashboard/layout.tsx
 import { Geist, Geist_Mono } from "next/font/google";
-import "react-toastify/dist/ReactToastify.css";
 import Sidebar from "@/components/sidebar";
 import NavbarDashboard from "@/components/navbar-dashboard";
 import { SidebarProvider } from "@/components/providers/sidebar-provider";

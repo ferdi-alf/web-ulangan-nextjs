@@ -5,7 +5,6 @@ import { getSiswa } from "@/lib/crudSiswa";
 import React from "react";
 import useSWR from "swr";
 import TableLoading from "@/components/skeleton/Table-loading";
-import { toast } from "react-toastify";
 import {
   Box,
   Paper,
@@ -20,6 +19,7 @@ import {
   Typography,
 } from "@mui/material";
 import FrameDataUsers from "../dialog/FrameDataUsers";
+import { showErrorToast } from "../toast/ToastSuccess";
 
 // 🚀 Ambil data siswa dari API
 const fetchSiswa = async () => {
@@ -40,11 +40,7 @@ const TableDataSiswa = () => {
   const [pagePerXII, setPagePerXII] = React.useState(0);
   const [rowsPerPageXII, setRowsPerPageXII] = React.useState(5);
 
-  const {
-    data: rawData,
-    error,
-    isLoading,
-  } = useSWR("siswa", fetchSiswa, { refreshInterval: 1000 });
+  const { data: rawData, error, isLoading } = useSWR("siswa", fetchSiswa);
 
   const { X, XI, XII, siswaPerKelasX, siswaPerKelasXI, siswaPerKelasXII } =
     React.useMemo(() => {
@@ -118,7 +114,7 @@ const TableDataSiswa = () => {
   }
 
   if (error) {
-    toast.error("Gagal memuat data");
+    showErrorToast("Error Loading data....");
     return <div>Error Loading data....</div>;
   }
 

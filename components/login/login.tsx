@@ -13,7 +13,7 @@ import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import { useActionState, useEffect, useState } from "react";
 import { ButtonLogin } from "@/components/button";
 import { LoginCredentials } from "@/lib/actions";
-import { toast } from "react-toastify";
+import { showErrorToast } from "../toast/ToastSuccess";
 
 const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -34,14 +34,10 @@ const LoginPage = () => {
   };
 
   useEffect(() => {
-    if (state?.message) {
-      toast.error(state.message, {
-        position: "top-right",
-        autoClose: 5000,
-        theme: "colored",
-      });
+    if (state?.error) {
+      showErrorToast(state?.message);
     }
-  }, [state?.message]);
+  }, [state]);
 
   return (
     <div className="p-8 bg-white/30  rounded-lg inset-0   shadow-lg max-w-md  ">
@@ -49,7 +45,7 @@ const LoginPage = () => {
       <form action={formAction} className="relative">
         <FormControl
           fullWidth
-          error={!!state?.error?.username}
+          error={!!state?.fieldErrors?.username}
           variant="standard"
           sx={{
             "& .MuiInput-root": {
@@ -91,12 +87,12 @@ const LoginPage = () => {
             aria-describedby="component-error-text"
           />
           <FormHelperText id="component-error-text">
-            {state?.error?.username}
+            {state?.fieldErrors?.username}
           </FormHelperText>
         </FormControl>
         <FormControl
           variant="standard"
-          error={!!state?.error?.password}
+          error={!!state?.fieldErrors?.password}
           fullWidth
           className="mt-10"
           sx={{
@@ -155,7 +151,7 @@ const LoginPage = () => {
             }
           />
 
-          <FormHelperText>{state?.error?.password}</FormHelperText>
+          <FormHelperText>{state?.fieldErrors?.password}</FormHelperText>
         </FormControl>
         <ButtonLogin />
       </form>

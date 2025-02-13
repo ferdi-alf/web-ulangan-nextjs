@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import {
@@ -28,6 +29,7 @@ import {
   showErrorToast,
   showSuccessToast,
 } from "@/components/toast/ToastSuccess";
+import { useSWRConfig } from "swr";
 
 interface SiswaData {
   id: string;
@@ -69,6 +71,8 @@ const FrameDataUsers = ({
     (siswa) =>
       siswa.kelasId?.tingkat === tingkat && siswa.kelasId?.jurusan === jurusan
   );
+
+  const { mutate } = useSWRConfig();
 
   const handleSelectAllClick = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.checked) {
@@ -123,8 +127,17 @@ const FrameDataUsers = ({
     if (result.isConfirmed) {
       try {
         const response = await deleteSiswa(selectedIds);
+        mutate(
+          "siswa",
+          (currentData: any) =>
+            currentData?.filter(
+              (kelas: any) => !selectedIds.includes(kelas.id)
+            ),
+          false
+        );
         if (response.success) {
           setSelected([]);
+          mutate("siswa");
           showSuccessToast(
             `Berhasil menghapus ${selectedIds.length} data dari kelas ${tingkat} - ${jurusan}`
           );

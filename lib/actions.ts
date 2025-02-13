@@ -3,7 +3,6 @@
 import { LoginSchema } from "@/lib/zod";
 import { signIn } from "@/auth";
 import { AuthError } from "next-auth";
-import "react-toastify/dist/ReactToastify.css";
 
 export const LoginCredentials = async (
   prevState: unknown,
@@ -15,7 +14,7 @@ export const LoginCredentials = async (
 
   if (!validateFields.success) {
     return {
-      error: validateFields.error.flatten().fieldErrors,
+      fieldErrors: validateFields.error.flatten().fieldErrors,
     };
   }
 
@@ -31,10 +30,10 @@ export const LoginCredentials = async (
     if (error instanceof AuthError) {
       switch (error.type) {
         case "CredentialsSignin":
-          return { message: "Invalid Credentials" };
+          return { error: true, message: "Invalid Credentials" };
 
         default:
-          return { message: "something went wrong" };
+          return { error: true, message: "something went wrong" };
       }
     }
     throw error;
