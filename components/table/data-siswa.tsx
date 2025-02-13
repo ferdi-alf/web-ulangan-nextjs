@@ -191,22 +191,30 @@ function SiswaTable({
           </TableHead>
 
           <TableBody>
-            {kelasList
-              .slice(page * rowPerPage, page * rowPerPage + rowPerPage)
-              .map((kelas, index) => (
-                <TableRow hover key={kelas}>
-                  <TableCell>{page * rowPerPage + index + 1}</TableCell>
-                  <TableCell>{kelas}</TableCell>
-                  <TableCell>{siswaPerKelas[kelas]} total data</TableCell>
-                  <TableCell>
-                    <FrameDataUsers
-                      tingkat={kelas.split(" - ")[0]}
-                      jurusan={kelas.split(" - ")[1]}
-                      siswaList={siswa}
-                    />
-                  </TableCell>
-                </TableRow>
-              ))}
+            {kelasList.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={7} align="center">
+                  Belum ada data untuk table ini
+                </TableCell>
+              </TableRow>
+            ) : (
+              kelasList
+                .slice(page * rowPerPage, page * rowPerPage + rowPerPage)
+                .map((kelas, index) => (
+                  <TableRow hover key={kelas}>
+                    <TableCell>{page * rowPerPage + index + 1}</TableCell>
+                    <TableCell>{kelas}</TableCell>
+                    <TableCell>{siswaPerKelas[kelas]} total data</TableCell>
+                    <TableCell>
+                      <FrameDataUsers
+                        tingkat={kelas.split(" - ")[0]}
+                        jurusan={kelas.split(" - ")[1]}
+                        siswaList={siswa}
+                      />
+                    </TableCell>
+                  </TableRow>
+                ))
+            )}
           </TableBody>
         </Table>
       </TableContainer>

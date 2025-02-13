@@ -9,9 +9,9 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { FormButton } from "../button";
+import { FormButton } from "@/components/button";
 import { useActionState, useEffect } from "react";
-import FormInputUsers from "../fragments/form-users";
+import FormInputUsers from "@/components/fragments/form-users";
 import { updateUsers } from "@/lib/crudUsers";
 import { SquarePen } from "lucide-react";
 import {
@@ -42,7 +42,7 @@ const ModalUpdateUsers = ({ userData }: { userData: UserData }) => {
       showSuccessToast(state.message);
     } else if (state?.error) {
       const errorMessage =
-        "server" in state.error ? state.error.server : "Unknown error";
+        "server" in state.error ? state.error.server : "Error";
 
       showErrorToast(errorMessage);
     }

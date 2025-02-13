@@ -25,7 +25,10 @@ import Image from "next/image";
 import { deleteUsers, getUsers } from "@/lib/crudUsers";
 import ModalUpdateUsers from "@/components/dialog/ModalUpdateUsers";
 import TableLoading from "@/components/skeleton/Table-loading";
-import { showErrorToast, showSuccessToast } from "../toast/ToastSuccess";
+import {
+  showErrorToast,
+  showSuccessToast,
+} from "@/components/toast/ToastSuccess";
 
 interface KelasId {
   id: string;

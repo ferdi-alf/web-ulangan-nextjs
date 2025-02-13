@@ -1,5 +1,5 @@
 "use server";
-import { AddSiswaSchema } from "@/lib/zod";
+import { AddSiswaSchema, UpdateSiswaSchema } from "@/lib/zod";
 import { cookies } from "next/headers";
 import { revalidateTag } from "next/cache";
 import { auth } from "@/auth";
@@ -193,5 +193,64 @@ export const deleteSiswa = async (ids: string[]) => {
   } catch (error) {
     console.log("Error deleting Siswa:", error);
     throw new Error("Failed to delete siswa");
+  }
+};
+
+export const updateSiswa = async (prevState: unknown, formData: FormData) => {
+  try {
+    const file = formData.get("image") as File;
+    if (file && file.size === 0) {
+      formData.delete("image");
+    }
+
+    const validateFields = UpdateSiswaSchema.safeParse(
+      Object.fromEntries(formData.entries())
+    );
+
+    if (!validateFields.success) {
+      return {
+        error: validateFields.error.flatten().fieldErrors,
+      };
+    }
+
+    const { id } = validateFields.data;
+    const apiUrl = process.env.NEXT_URL_API_URL || "http://localhost:3000";
+    const cookieStore = await cookies();
+    const sessionCookie = cookieStore.get("next-auth.session-token");
+
+    const response = await fetch(`${apiUrl}/api/siswa/${id}`, {
+      method: "PUT",
+      headers: {
+        Cookie: `next-auth.session-token=${sessionCookie?.value}`,
+      },
+      body: formData, // Send formData directly
+      credentials: "include",
+    });
+
+    const responseData = await response.json();
+
+    if (!response.ok) {
+      if (responseData.error && typeof responseData.error === "object") {
+        return {
+          error: responseData.error,
+        };
+      }
+      throw new Error(responseData.message || "Gagal mengupdate data siswa");
+    }
+
+    revalidateTag("siswa");
+
+    return {
+      success: true,
+      data: responseData.data,
+      message: "Berhasil mengupdate data siswa",
+    };
+  } catch (error) {
+    console.error("Error saat update:", error);
+    return {
+      error: {
+        server: (error as Error).message || "Terjadi kesalahan pada server",
+      },
+    };
   }
 };

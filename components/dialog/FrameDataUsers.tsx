@@ -19,7 +19,7 @@ import {
   Typography,
 } from "@mui/material";
 import { MoveLeft } from "lucide-react";
-import { SetStateAction, useState } from "react";
+import { SetStateAction, useMemo, useState } from "react";
 import FilterListIcon from "@mui/icons-material/FilterList";
 import DeleteIcon from "@mui/icons-material/Delete";
 import Image from "next/image";
@@ -30,6 +30,9 @@ import {
   showSuccessToast,
 } from "@/components/toast/ToastSuccess";
 import { useSWRConfig } from "swr";
+import SearchField from "@/components/search";
+import { useSearchParams } from "next/navigation";
+import ModalUpdateSiswa from "@/components/dialog/ModalUpdateSiswa";
 
 interface SiswaData {
   id: string;
@@ -66,11 +69,31 @@ const FrameDataUsers = ({
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [selected, setSelected] = useState<string[]>([]);
+  const searchParams = useSearchParams();
+  const searchTerm = searchParams.get("search")?.toLocaleLowerCase() ?? "";
 
-  const filteredSiswa = siswaList.filter(
-    (siswa) =>
-      siswa.kelasId?.tingkat === tingkat && siswa.kelasId?.jurusan === jurusan
-  );
+  const filteredSiswa = useMemo(() => {
+    // Filter berdasarkan kelas
+    const filteredByClass = siswaList.filter(
+      (siswa) =>
+        siswa.kelasId?.tingkat === tingkat && siswa.kelasId?.jurusan === jurusan
+    );
+
+    // Filter berdasarkan pencarian
+    const filtered = filteredByClass.filter((item) => {
+      if (!searchTerm) return true;
+
+      return (
+        item.name.toLowerCase().includes(searchTerm) ||
+        item.nis.toLowerCase().includes(searchTerm) ||
+        item.ruang.toLowerCase().includes(searchTerm) ||
+        item.kelamin.toLowerCase().includes(searchTerm)
+      );
+    });
+
+    // **Tambahkan sorting berdasarkan nama (ascending)**
+    return filtered.sort((a, b) => a.name.localeCompare(b.name));
+  }, [siswaList, tingkat, jurusan, searchTerm]);
 
   const { mutate } = useSWRConfig();
 
@@ -160,7 +183,6 @@ const FrameDataUsers = ({
         View Data
       </button>
 
-      {/* Frame yang muncul dari kanan */}
       <div
         className={`fixed top-0 z-30 right-0 h-screen overflow-auto bg-white shadow-lg transition-transform duration-300 ${
           frame ? "translate-x-0 w-full border" : "translate-x-full w-0"
@@ -182,9 +204,13 @@ const FrameDataUsers = ({
               </div>
             </div>
 
-            <div className=" p-3">
+            <div className=" py-2">
               <Box sx={{ width: "100%" }}>
                 <Paper>
+                  <div className="w-full pr-3 pt-4 flex justify-end">
+                    <SearchField />
+                  </div>
+
                   <Toolbar
                     sx={{
                       pl: { sm: 2 },
@@ -253,6 +279,7 @@ const FrameDataUsers = ({
                           <TableCell>NIS</TableCell>
                           <TableCell>Ruang</TableCell>
                           <TableCell>Jenis Kelamin</TableCell>
+                          <TableCell>Actions</TableCell>
                         </TableRow>
                       </TableHead>
                       <TableBody>
@@ -293,6 +320,9 @@ const FrameDataUsers = ({
                                 <TableCell>{siswa.nis}</TableCell>
                                 <TableCell>{siswa.ruang}</TableCell>
                                 <TableCell>{siswa.kelamin}</TableCell>
+                                <TableCell>
+                                  <ModalUpdateSiswa siswa={siswa} />
+                                </TableCell>
                               </TableRow>
                             );
                           })}
